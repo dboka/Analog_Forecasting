@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07131e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230d1c29'/%3E%3Cpath d='M11 39l12-15 10 11 9-18 11 8' fill='none' stroke='%234dd7c1' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <title>Weather Scanner · Rīga LU</title>
+  <meta name="description" content="Rīgas LU temperatūras un nokrišņu vēsturiskie analogi.">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./precip.css">
+</head>
+<body>
+  <nav class="weather-mode" role="group" aria-label="Meteoroloģiskais rādītājs">
+    <button type="button" id="modeTemperature" aria-pressed="true">Temperatūra <span>HTDRY</span></button>
+    <button type="button" id="modePrecipitation" aria-pressed="false">Nokrišņi <span>HPRAB</span></button>
+  </nav>
+  <main id="temperatureShell" class="shell" aria-label="Rīgas LU temperatūras analogi">
+    <div class="analysis-grid">
+      <section class="panel forecast-panel" aria-labelledby="forecast-title">
+        <div class="panel-topline"><span class="eyebrow"><span class="live-pip"></span> SIGNĀLS / TURPINĀJUMS</span><span class="source-pill">RĪGA LU <span class="pill-separator">/</span> HTDRY</span></div>
+        <div class="chart-title-row"><h1 id="forecast-title">24h <span class="arrow">→</span> 24h</h1><span id="forecastDayLabel" class="date-range">—</span></div>
+        <div class="date-navigator" aria-label="Prognozes dienas pārslēgšana">
+          <div class="date-readout"><span>IZVĒLĒTĀ PROGNOZES DIENA</span><strong id="selectedDateLabel">Ielādē…</strong><small id="dateContext">24h ievade → nākamās 24h</small></div>
+          <div class="date-controls"><button type="button" id="previousDay" aria-label="Iepriekšējā oktobra diena">←</button><button type="button" id="nextDay" aria-label="Nākamā oktobra diena">→</button><button type="button" id="todayButton" class="today-button">ŠODIEN <span aria-hidden="true">↗</span></button></div>
+          <a class="month-jump" href="#monthReview">OKTOBRA PĀRSKATS ↓</a>
+        </div>
+        <div class="chart-labels" aria-label="Grafika līkņu skaidrojums">
+          <span><i class="swatch teal"></i><span id="inputLegendLabel">Rīga LU ievade</span></span>
+          <span><i class="swatch violet"></i>Analogu prognoze</span>
+          <span id="normalLegend" hidden><i class="swatch normal"></i><span id="normalLabel">Vēsturiskā norma</span></span>
+          <button type="button" id="toggleSelectedAnalog" class="legend-toggle analog-toggle" aria-pressed="true" hidden title="Rādīt vai paslēpt izvēlētā analoga turpinājumu"><i class="swatch best"></i><span id="bestAnalogueLabel">Izvēlētais analogs</span><span class="toggle-indicator" aria-hidden="true">●</span></button>
+          <button type="button" id="toggleTodayMatch" class="legend-toggle" aria-pressed="true" hidden title="Rādīt vai paslēpt pēc fakta atrasto šodienas sakritību"><i class="swatch today-match"></i><span id="observedMatchLabel">Šodienas sakritība</span><span class="toggle-indicator" aria-hidden="true">●</span></button>
+          <span><i class="swatch lime"></i>Faktiski</span>
+        </div>
+        <div class="chart-frame forecast-frame"><div class="axis-label">TEMPERATŪRA / °C</div><canvas id="forecastChart" aria-label="Vakardienas temperatūra, prognoze, analogi un faktiskie mērījumi"></canvas><div class="chart-tooltip" id="forecastTooltip"></div></div>
+        <div class="forecast-chart-footer"><div><span class="shade-key"></span><span>Prognožu diapazons: 10.–90. procentile no 8 analogiem</span></div><div id="actualStatus">Gaida mērījumus</div></div>
+        <p id="normalContext" class="normal-context" hidden></p>
+        <section id="monthReview" class="month-review" aria-labelledby="monthTitle">
+          <div class="month-review-heading"><div><span class="eyebrow">DIENU ARHĪVS / RĪGA LU</span><h2 id="monthTitle">Oktobris</h2></div><div id="monthSummary" class="month-summary">Aprēķina mēneša pārskatu…</div></div>
+          <p class="month-intro">Izvēlies dienu, lai redzētu tās 24h prognozi pret faktisko temperatūru. MAE ir vidējā absolūtā kļūda. 1. oktobra ievade ir 30. septembris.</p>
+          <div class="month-weekdays" aria-hidden="true"><span>P</span><span>O</span><span>T</span><span>C</span><span>P</span><span>S</span><span>Sv</span></div>
+          <div id="monthGrid" class="month-grid" role="group" aria-label="Oktobra dienas"><div class="month-loading">Ielādē dienas…</div></div>
+          <p class="month-footnote">Vēsturiskās prognozes ir rekonstruētas ar pašreizējo algoritmu, izmantojot tikai tajā dienā jau pagājušo 24h ievadi. Dienu rezultāti neietekmē analogu atlasi.</p>
+        </section>
+      </section>
+      <aside class="panel matches-panel" aria-labelledby="matches-title">
+        <div class="matches-title"><p class="eyebrow">03 / VĒSTURISKĀS SAKRITĪBAS</p><h2 id="matches-title">Tuvākie analogi</h2><p>Spied uz analoga, lai dzeltenajā līknē redzētu tā nākamās dienas turpinājumu.</p></div>
+        <div id="matches" class="matches-list"><div class="loading">Meklējam pilnās HTDRY dienas…</div></div>
+        <div class="matches-bottom"><span class="mini-dot"></span><span id="candidateSources">Ievade un analogi tikai no Rīgas LU · HTDRY</span></div>
+      </aside>
+    </div>
+    <section class="panel october-panel" aria-labelledby="octoberTitle">
+      <div class="october-heading">
+        <div>
+          <p class="eyebrow">04 / MĒNEŠA VĒSTURISKĀ LĪDZĪBA</p>
+          <h2 id="octoberTitle">Oktobra analogi</h2>
+          <p>Kuram vēsturiskajam oktobrim visvairāk līdzinās 2026. gada temperatūras attīstība?</p>
+        </div>
+        <div class="october-periods" role="group" aria-label="Oktobra salīdzināšanas periods">
+          <button type="button" data-october-period="all" aria-pressed="true">Viss oktobris</button>
+          <button type="button" data-october-period="10" aria-pressed="false">Pēdējās 10 dienas</button>
+          <button type="button" data-october-period="7" aria-pressed="false">Pēdējās 7 dienas</button>
+        </div>
+      </div>
+      <div class="october-methods" role="group" aria-label="Oktobru līdzības vērtēšanas metode">
+        <button type="button" data-october-method="temperature" aria-pressed="true">Temperatūras līdzība</button>
+        <button type="button" data-october-method="profile" aria-pressed="false">Diennakts patternu līdzība</button>
+        <button type="button" data-october-method="regime" aria-pressed="false">Vairāku dienu režīma līdzība</button>
+      </div>
+      <div class="october-info"><span id="octoberWindow">Ielādē oktobra salīdzinājumu…</span><span id="octoberCandidateCount"></span></div>
+      <div class="october-layout">
+        <div class="october-plot">
+          <div class="october-legend"><span><i class="swatch teal"></i>2026. gada Rīga LU</span><span><i class="october-line-key"></i>Vēsturiskais oktobris</span><span><i class="october-line-key dashed"></i>Turpinājums pēc salīdzinājuma</span></div>
+          <div class="october-chart-frame"><canvas id="octoberChart" aria-label="2026. gada oktobra temperatūra un izvēlēto vēsturisko oktobru līknes"></canvas><div class="chart-tooltip" id="octoberTooltip"></div></div>
+          <p class="october-chart-note">Dienas ar nepilniem vai nederīgiem 24h mērījumiem grafikā paliek tukšas. Pārtrauktā līnija ir vēsturiskais turpinājums, ne prognoze.</p>
+        </div>
+        <aside class="october-results" aria-label="Pieci līdzīgākie vēsturiskie oktobri">
+          <h3>TOP 5 <span>/ SPIED, LAI RĀDĪTU</span></h3>
+          <div id="octoberMatches" class="october-matches"><p class="loading">Meklējam vēsturiskos oktobrus…</p></div>
+        </aside>
+      </div>
+      <p class="october-method" id="octoberMethodExplanation">Rangs = 30% MAE + 40% RMSE + 30% formas RMSE. Forma salīdzina stundu līknes pēc katra perioda vidējās temperatūras atņemšanas. Vēsturiskās līknes rāda sākotnējās °C vērtības bez nobīdes. Vērtē tikai vienādas kalendāra stundas izvēlētajā posmā; turpmākās dienas atlasē nepiedalās.</p>
+    </section>
+  </main>
+  <main id="precipitationShell" class="shell precip-shell" aria-label="Rīgas LU nokrišņu analogi" hidden>
+    <section class="panel precip-head">
+      <div><p class="eyebrow"><span class="live-pip"></span> RĪGA LU / CLIDATA HPRAB</p><h1>Nokrišņu analogi</h1><p>Stundas nokrišņu summa milimetros. Tikai pilnas Rīgas LU 24h dienas, bez iztrūkumu aizpildīšanas.</p></div>
+      <span class="source-pill">RIGASLU <span class="pill-separator">/</span> HPRAB</span>
+    </section>
+    <section class="panel precip-forecast-panel" aria-labelledby="precipForecastTitle">
+      <div class="precip-section-heading"><div><p class="eyebrow">01 / EKSPERIMENTĀLA PROGNOZE</p><h2 id="precipForecastTitle">24h <span class="arrow">→</span> 24h</h2><p>Vēsturisko nokrišņu dienu turpinājumi. Scenāriju diapazons ir analogu izkliede, ne kalibrēts ticamības intervāls.</p></div><div class="precip-date-control"><label for="precipDate">PROGNOZES DIENA</label><input id="precipDate" type="date"><button type="button" id="precipToday">ŠODIEN ↗</button></div></div>
+      <div class="precip-kpis"><div><span>ANALOGU VĒRTĒJUMS ≥1 mm</span><strong id="precipChance">—</strong></div><div><span>SAGAIDĀMĀ SUMMA</span><strong id="precipExpected">—</strong></div><div><span>SCENĀRIJI / 10.–90. PROCENTILE</span><strong id="precipScenarios">—</strong></div></div>
+      <div class="precip-chart-title"><span>STUNDAS SUMMA / mm</span><span>Stabiņi: analogi un faktiskie · līnija: slapjo analogu svaru daļa</span></div>
+      <div class="precip-canvas-wrap"><canvas id="precipForecastChart" aria-label="24 stundu nokrišņu scenārijs, slapjo analogu daļa un faktiskie mērījumi"></canvas></div>
+      <div class="precip-legend"><span><i class="precip-key violet"></i>Analogu vidējais</span><span><i class="precip-key lime"></i>Faktiski</span><span><i class="precip-key teal line"></i>Slapjo analogu daļa</span></div>
+      <p id="precipForecastStatus" class="october-chart-note">Ielādē nokrišņu prognozi…</p>
+      <details class="precip-forecast-details"><summary>8 izmantotie vēsturiskie analogi</summary><div id="precipForecastMatches"></div></details>
+    </section>
+    <section class="panel precip-october-panel" aria-labelledby="precipOctoberTitle">
+      <div class="precip-section-heading"><div><p class="eyebrow">02 / VĒSTURISKAIS OKTOBRIS</p><h2 id="precipOctoberTitle">Oktobra analogi</h2><p>2026. gada nokrišņu daudzums un ritms pret iepriekšējiem Rīgas LU oktobriem.</p></div><div class="october-periods" role="group" aria-label="Nokrišņu salīdzināšanas periods"><button type="button" data-precip-period="all" aria-pressed="true">Viss oktobris</button><button type="button" data-precip-period="10" aria-pressed="false">Pēdējās 10 dienas</button><button type="button" data-precip-period="7" aria-pressed="false">Pēdējās 7 dienas</button></div></div>
+      <div class="october-methods" role="group" aria-label="Nokrišņu līdzības metode"><button type="button" data-precip-method="amount" aria-pressed="true">Nokrišņu daudzums</button><button type="button" data-precip-method="episodes" aria-pressed="false">Nokrišņu epizodes</button><button type="button" data-precip-method="rhythm" aria-pressed="false">Sausuma / nokrišņu ritms</button></div>
+      <div class="october-info"><span id="precipWindow">Ielādē oktobra datus…</span><span id="precipCandidates"></span></div>
+      <div class="precip-october-grid"><div class="precip-plots"><div class="precip-plot-card"><h3>Diennakts nokrišņu summa <small>mm / dienā</small></h3><div class="precip-canvas-wrap"><canvas id="precipDailyChart" aria-label="Oktobra diennakts nokrišņu stabiņi"></canvas></div></div><div class="precip-plot-card"><h3>Mēneša kumulatīvie nokrišņi <small>mm</small></h3><div class="precip-canvas-wrap"><canvas id="precipCumulativeChart" aria-label="2026. un vēsturiskā oktobra uzkrāto nokrišņu līknes"></canvas></div></div><div class="precip-plot-card"><div class="precip-hour-head"><h3>Stundas intensitāte <small>mm / stundā</small></h3><label>Datums <select id="precipHourDay"></select></label></div><div class="precip-canvas-wrap"><canvas id="precipHourlyChart" aria-label="Izvēlētās oktobra dienas nokrišņi pa stundām"></canvas></div></div><p class="october-chart-note">Iekrāsotā zona ir pēc salīdzinājuma robežas. Turpinājuma stabiņi un līkne ir vēsturiski novērojumi; tie nepiedalās rangā.</p></div><aside class="october-results"><h3>TOP 5 <span>/ IZVĒLIES GADU GRAFIKIEM</span></h3><div id="precipMatches" class="october-matches"></div></aside></div>
+      <p id="precipMethodExplanation" class="october-method"></p>
+    </section>
+  </main>
+  <script type="module" src="./app.js"></script>
+  <script type="module" src="./precip.js"></script>
+</body>
+</html>

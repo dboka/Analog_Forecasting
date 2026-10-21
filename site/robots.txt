@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://dboka.github.io/Analog_Forecasting/sitemap.xml

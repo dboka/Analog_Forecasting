@@ -22,7 +22,7 @@ Jauni mērījumi jāsinhronizē datorā, kam ir CLIDATA piekļuve. PowerShell ko
 
     .\publish_snapshot.ps1 -Push
 
-Šo komandu var ieplānot Windows Task Scheduler, kamēr dators un CLIDATA ir pieejami. GitHub Actions darbplūsma **tikai izvieto** jau aprēķināto `site/` mapi; CLIDATA parole netiek nodota GitHub. Ja lokālā sinhronizācija vai testi neizdodas, jauna kopija netiek publicēta. Komanda bez `-Push` ļauj vispirms apskatīt izmaiņas lokāli.
+`register_update_task.ps1` ieplāno šo komandu Windows Task Scheduler ik pēc trim stundām, sākot no 06:00, kamēr dators, lietotāja sesija un CLIDATA ir pieejami. Ja novērojumi un avota kods nav mainījušies, izgriezums netiek pārbūvēts un jauns commit netiek veidots. GitHub Actions darbplūsma **tikai izvieto** jau aprēķināto `site/` mapi; CLIDATA parole netiek nodota GitHub. Ja lokālā sinhronizācija vai testi neizdodas, jauna kopija netiek publicēta. Komanda bez `-Push` ļauj vispirms apskatīt izmaiņas lokāli.
 
 ## Lapa
 

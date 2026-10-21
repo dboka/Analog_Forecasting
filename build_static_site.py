@@ -7,6 +7,7 @@ never database connection settings or the raw hourly cache files.
 from __future__ import annotations
 
 import json
+import hashlib
 import shutil
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -35,6 +36,27 @@ def build(today=None):
         raise ValueError("Refusing to replace a directory outside this project")
     riga, _ = read_cache(RIGA_STATION_ID)
     precip, _ = read_precip_cache()
+    fingerprint = hashlib.sha256()
+    for label, values in (("HTDRY", riga), ("HPRAB", precip)):
+        fingerprint.update(label.encode())
+        fingerprint.update(json.dumps(sorted(values.items()), separators=(",", ":")).encode())
+    for source in sorted((ROOT / "public").iterdir()):
+        if source.is_file():
+            fingerprint.update(source.name.encode())
+            fingerprint.update(source.read_bytes())
+    for name in ("model.py", "precipitation.py", "build_static_site.py"):
+        fingerprint.update((ROOT / name).read_bytes())
+    input_hash = fingerprint.hexdigest()
+    old_status = SITE / "api" / "status.json"
+    if old_status.is_file():
+        try:
+            previous = json.loads(old_status.read_text(encoding="utf-8"))
+            if previous.get("today") == today.isoformat() and previous.get("inputHash") == input_hash:
+                result = {"site": str(SITE), "snapshotDate": today.isoformat(), "unchanged": True}
+                print(json.dumps(result, ensure_ascii=False))
+                return result
+        except (ValueError, OSError):
+            pass
     days, pairs = build_day_index({RIGA_STATION_ID: riga})
     precip_days, precip_pairs = build_day_index({RIGA_STATION_ID: precip})
     names = {RIGA_STATION_ID: "Rīga LU"}
@@ -104,6 +126,7 @@ def build(today=None):
     status = {"station": "Rīga LU", "stationId": RIGA_STATION_ID,
               "element": "HTDRY", "today": today.isoformat(),
               "reviewMonth": review_month, "snapshotAt": snapshot_time,
+              "inputHash": input_hash,
               "snapshotFirstPrecipDate": min(precipitation_forecasts).isoformat()}
     save_json("status.json", status)
     save_json(f"month/{review_month}.json", month)

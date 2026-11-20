@@ -12,7 +12,7 @@
 </head>
 <body>
   <script>window.WEATHER_STATIC_SNAPSHOT = true;</script>
-  <div class="snapshot-banner">ANALOG FORECASTING · DATU IZGRIEZUMS ATJAUNOTS 28.10.2026 09:00 (RĪGA). MĒRĪJUMI MAINĀS PĒC NĀKAMĀS PUBLICĒŠANAS.</div>
+  <div class="snapshot-banner">ANALOG FORECASTING · DATU IZGRIEZUMS ATJAUNOTS 20.11.2026 10:23 (RĪGA). MĒRĪJUMI MAINĀS PĒC NĀKAMĀS PUBLICĒŠANAS.</div>
   <nav class="weather-mode" role="group" aria-label="Meteoroloģiskais rādītājs">
     <button type="button" id="modeTemperature" aria-pressed="true">Temperatūra <span>HTDRY</span></button>
     <button type="button" id="modePrecipitation" aria-pressed="false">Nokrišņi <span>HPRAB</span></button>
@@ -24,8 +24,8 @@
         <div class="chart-title-row"><h1 id="forecast-title">24h <span class="arrow">→</span> 24h</h1><span id="forecastDayLabel" class="date-range">—</span></div>
         <div class="date-navigator" aria-label="Prognozes dienas pārslēgšana">
           <div class="date-readout"><span>IZVĒLĒTĀ PROGNOZES DIENA</span><strong id="selectedDateLabel">Ielādē…</strong><small id="dateContext">24h ievade → nākamās 24h</small></div>
-          <div class="date-controls"><button type="button" id="previousDay" aria-label="Iepriekšējā oktobra diena">←</button><button type="button" id="nextDay" aria-label="Nākamā oktobra diena">→</button><button type="button" id="todayButton" class="today-button">ŠODIEN <span aria-hidden="true">↗</span></button></div>
-          <a class="month-jump" href="#monthReview">OKTOBRA PĀRSKATS ↓</a>
+          <div class="date-controls"><button type="button" id="previousDay" aria-label="Iepriekšējā diena">←</button><button type="button" id="nextDay" aria-label="Nākamā diena">→</button><button type="button" id="todayButton" class="today-button">ŠODIEN <span aria-hidden="true">↗</span></button></div>
+          <a class="month-jump" href="#monthReview">MĒNEŠA PĀRSKATS ↓</a>
         </div>
         <div class="chart-labels" aria-label="Grafika līkņu skaidrojums">
           <span><i class="swatch teal"></i><span id="inputLegendLabel">Rīga LU ievade</span></span>
@@ -39,10 +39,11 @@
         <div class="forecast-chart-footer"><div><span class="shade-key"></span><span>Prognožu diapazons: 10.–90. procentile no 8 analogiem</span></div><div id="actualStatus">Gaida mērījumus</div></div>
         <p id="normalContext" class="normal-context" hidden></p>
         <section id="monthReview" class="month-review" aria-labelledby="monthTitle">
-          <div class="month-review-heading"><div><span class="eyebrow">DIENU ARHĪVS / RĪGA LU</span><h2 id="monthTitle">Oktobris</h2></div><div id="monthSummary" class="month-summary">Aprēķina mēneša pārskatu…</div></div>
-          <p class="month-intro">Izvēlies dienu, lai redzētu tās 24h prognozi pret faktisko temperatūru. MAE ir vidējā absolūtā kļūda. 1. oktobra ievade ir 30. septembris.</p>
+          <div class="month-review-heading"><div><span class="eyebrow">DIENU ARHĪVS / RĪGA LU</span><h2 id="monthTitle">Ielādē…</h2></div><div id="monthSummary" class="month-summary">Aprēķina mēneša pārskatu…</div></div>
+          <div class="month-tabs" role="group" aria-label="Dienu arhīva mēnesis"><button type="button" data-review-month="2026-10" aria-pressed="false">Oktobris</button><button type="button" data-review-month="2026-11" aria-pressed="false">Novembris</button></div>
+          <p id="monthIntro" class="month-intro">Izvēlies dienu, lai redzētu tās 24h prognozi pret faktisko temperatūru. MAE ir vidējā absolūtā kļūda.</p>
           <div class="month-weekdays" aria-hidden="true"><span>P</span><span>O</span><span>T</span><span>C</span><span>P</span><span>S</span><span>Sv</span></div>
-          <div id="monthGrid" class="month-grid" role="group" aria-label="Oktobra dienas"><div class="month-loading">Ielādē dienas…</div></div>
+          <div id="monthGrid" class="month-grid" role="group" aria-label="Mēneša dienas"><div class="month-loading">Ielādē dienas…</div></div>
           <p class="month-footnote">Vēsturiskās prognozes ir rekonstruētas ar pašreizējo algoritmu, izmantojot tikai tajā dienā jau pagājušo 24h ievadi. Dienu rezultāti neietekmē analogu atlasi.</p>
         </section>
       </section>

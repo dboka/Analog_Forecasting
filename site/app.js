@@ -9,7 +9,7 @@ const colors = {
 };
 const state = { forecast: null, geometry: null, hoverX: null, selectedIndex: 0,
                 selectedKey: null, showSelectedAnalog: true, showTodayMatch: true, todayDate: null,
-                selectedDate: null, reviewMonth: null, month: null, forecastRequest: 0,
+                selectedDate: null, reviewMonth: null, defaultReviewMonth: null, month: null, forecastRequest: 0, monthRequest: 0,
                 october: null, octoberPeriod: 'all', octoberMethod: 'temperature', octoberRequest: 0,
                 octoberVisible: new Set(), octoberSelectionInitialized: false,
                 octoberGeometry: null, octoberHover: null };
@@ -230,7 +230,14 @@ function renderMonth() {
   const data = state.month;
   if (!data) return;
   const monthDate = `${data.month}-01T12:00:00Z`;
-  $('#monthTitle').textContent = localDate(monthDate, { month: 'long', year: 'numeric' });
+  const monthName = localDate(monthDate, { month: 'long', year: 'numeric' });
+  $('#monthTitle').textContent = monthName;
+  $('#monthGrid').setAttribute('aria-label', `${monthName} dienas`);
+  const previousDate = new Date(monthDate);
+  previousDate.setUTCDate(0);
+  $('#monthIntro').textContent = `Izvēlies dienu, lai redzētu tās 24h prognozi pret faktisko temperatūru. MAE ir vidējā absolūtā kļūda. ${dateLabel(data.month + '-01')} ievade ir ${dateLabel(previousDate.toISOString().slice(0, 10))}.`;
+  document.querySelectorAll('[data-review-month]').forEach(button =>
+    button.setAttribute('aria-pressed', String(button.dataset.reviewMonth === data.month)));
   $('#monthSummary').innerHTML = data.completeDays
     ? `<strong>${number(data.completeDays)}</strong> pilnas dienas · MAE <strong>${temp(data.mae, 2)}C</strong> · RMSE ${temp(data.rmse, 2)}C`
     : 'Vēl nav pilnu dienu ar prognozi un faktiskajiem mērījumiem';
@@ -323,6 +330,16 @@ function installInteractions() {
       $('.date-navigator').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
+  $('.month-tabs').addEventListener('click', event => {
+    const button = event.target.closest('[data-review-month]');
+    if (!button || button.dataset.reviewMonth === state.reviewMonth) return;
+    state.reviewMonth = button.dataset.reviewMonth;
+    state.month = null;
+    $('#monthGrid').innerHTML = '<div class="month-loading">Ielādē dienas…</div>';
+    document.querySelectorAll('[data-review-month]').forEach(tab =>
+      tab.setAttribute('aria-pressed', String(tab === button)));
+    loadMonth(state.reviewMonth);
+  });
   $('#previousDay').addEventListener('click', () => {
     const dates = availableDates(), index = dates.indexOf(state.selectedDate);
     if (index > 0) selectDate(dates[index - 1]);
@@ -377,12 +394,14 @@ async function loadForecast(date) {
   }
 }
 async function loadMonth(month) {
+  const request = ++state.monthRequest;
   try {
     const data = await api(`/api/month?month=${encodeURIComponent(month)}`);
-    if (month !== state.reviewMonth) return;
+    if (request !== state.monthRequest || month !== state.reviewMonth) return;
     state.month = data;
     renderMonth();
   } catch (error) {
+    if (request !== state.monthRequest) return;
     $('#monthGrid').innerHTML = `<div class="month-loading">${escapeHtml(error.message)}</div>`;
     $('#monthSummary').textContent = 'Pārskats nav pieejams';
   }
@@ -595,6 +614,7 @@ async function initialize() {
     state.todayDate = status.today;
     state.selectedDate = status.today;
     state.reviewMonth = status.reviewMonth;
+    state.defaultReviewMonth = status.reviewMonth;
     updateNavigation();
     await Promise.allSettled([loadForecast(status.today), loadMonth(status.reviewMonth), loadOctober('all')]);
   } catch (error) {
@@ -608,10 +628,11 @@ async function refresh() {
     const wasToday = state.selectedDate === state.todayDate;
     state.todayDate = status.today;
     if (wasToday) state.selectedDate = status.today;
-    if (state.reviewMonth !== status.reviewMonth) {
+    if (state.defaultReviewMonth !== status.reviewMonth && state.reviewMonth === state.defaultReviewMonth) {
       state.reviewMonth = status.reviewMonth;
       state.month = null;
     }
+    state.defaultReviewMonth = status.reviewMonth;
     updateNavigation();
     await Promise.allSettled([loadForecast(state.selectedDate), loadMonth(state.reviewMonth),
                               loadOctober(state.octoberPeriod)]);

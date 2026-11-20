@@ -55,6 +55,10 @@
 .october-results{padding:7px 0 0}.october-results h3{margin:0 0 15px;font:500 13px var(--mono);letter-spacing:.16em;color:#d9e9e9}.october-results h3 span{font-size:10px;color:#7f9eaa;letter-spacing:.09em}
 .october-match{display:grid;grid-template-columns:7px 29px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:14px 9px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer;transition:background .18s,opacity .18s}.october-match:hover{background:#15303d}.october-match[aria-pressed="true"]{background:#19323c}.october-match[aria-pressed="false"]{opacity:.65}.october-match-bar{height:46px;width:4px;border-radius:4px;background:var(--analog-color)}.october-match-rank{font:12px var(--mono);color:#7899a8}.october-match-year{display:block;font:600 21px var(--display)}.october-match-detail{display:block;margin-top:3px;font:10px/1.5 var(--mono);color:#8eadba}.october-match-score{font:500 16px var(--mono);color:var(--analog-color);text-align:right}.october-match-score small{display:block;font:10px var(--mono);color:#7898a5}
 .october-method{margin:23px 0 0;padding-top:18px;border-top:1px solid var(--line);color:#86a7b4;font:11px/1.65 var(--mono)}
+.month-tabs{display:flex;gap:5px;width:max-content;max-width:100%;margin-top:18px;padding:4px;border:1px solid #365262;border-radius:10px;background:#091923}
+.month-tabs button{border:0;border-radius:7px;background:transparent;color:#98b6c2;padding:8px 13px;cursor:pointer;font:11px var(--mono)}
+.month-tabs button[aria-pressed="true"]{background:#20434a;color:#d7f6ee}
+.month-tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 @media(max-width:1100px){.october-layout{grid-template-columns:1fr}.october-matches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.october-chart-frame{height:430px}}
 @media(max-width:650px){.october-panel{padding:22px 18px}.october-periods{width:100%}.october-periods button{flex:1;padding:10px 5px;font-size:10px}.october-matches{display:block}.october-chart-frame{height:360px}.october-info{font-size:10px}.october-heading p:last-child{font-size:14px}}
 

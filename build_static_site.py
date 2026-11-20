@@ -60,12 +60,13 @@ def build(today=None):
     days, pairs = build_day_index({RIGA_STATION_ID: riga})
     precip_days, precip_pairs = build_day_index({RIGA_STATION_ID: precip})
     names = {RIGA_STATION_ID: "Rīga LU"}
-    review_year = today.year if today.month >= 10 else today.year - 1
-    review_month = f"{review_year}-10"
+    review_month = "2026-11" if today >= date(2026, 11, 1) else "2026-10"
 
     # Prepare all calculations before replacing the published snapshot.
-    month = make_month_overview(riga, review_year, 10, today, days, pairs, names)
-    forecast_days = {date.fromisoformat(item["date"]) for item in month["days"]
+    months = {f"2026-{month:02d}": make_month_overview(
+        riga, 2026, month, today, days, pairs, names) for month in (10, 11)}
+    forecast_days = {date.fromisoformat(item["date"])
+                     for overview in months.values() for item in overview["days"]
                      if item["status"] not in {"future", "unavailable"}}
     forecast_days.add(today)
     temperature_forecasts = {}
@@ -85,11 +86,11 @@ def build(today=None):
         raise ValueError("Today's complete input day is missing; keep the previous published snapshot")
 
     october = {(period, method): make_october_analogues(
-        days, review_year, today, period, method)
+        days, 2026, today, period, method)
         for period in ("all", "10", "7")
         for method in ("temperature", "profile", "regime")}
     precipitation_october = {(period, method): make_precip_october(
-        precip_days, review_year, today, period, method)
+        precip_days, 2026, today, period, method)
         for period in ("all", "10", "7")
         for method in ("amount", "episodes", "rhythm")}
 
@@ -129,7 +130,8 @@ def build(today=None):
               "inputHash": input_hash,
               "snapshotFirstPrecipDate": min(precipitation_forecasts).isoformat()}
     save_json("status.json", status)
-    save_json(f"month/{review_month}.json", month)
+    for month, overview in months.items():
+        save_json(f"month/{month}.json", overview)
     for day, value in temperature_forecasts.items():
         save_json(f"forecast/{day.isoformat()}.json", value)
     for day, value in precipitation_forecasts.items():
